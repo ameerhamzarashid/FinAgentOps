@@ -39,3 +39,51 @@ Stage 0: Project Setup and Planning
 ## Tech Stack
 
 Python, PostgreSQL, Docker, yfinance, scikit-learn, MLflow, Prefect, LangGraph, FastAPI, Power BI.
+
+## Stage 1: Stock Data Ingestion Pipeline
+
+Stage 1 downloads historical stock market data for selected tickers, saves the raw dataset as CSV, and loads the cleaned records into PostgreSQL.
+
+### Current Tickers
+
+AAPL, MSFT, NVDA, GOOGL, AMZN, META, TSLA, JPM, V, NFLX
+
+### Pipeline Steps
+
+1. Download historical stock data using yfinance
+2. Clean and standardise column names
+3. Save raw CSV file to `data/raw/stock_prices.csv`
+4. Insert stock metadata into the `stocks` table
+5. Insert daily OHLCV price records into the `ticker_prices` table
+6. Validate inserted records using a database check script
+
+### Run Database Schema
+
+```bash
+python -m src.database.init_db
+
+## Stage 2: Feature Engineering
+
+Stage 2 converts raw stock price data into technical indicators for machine learning.
+
+### Features Created
+
+- Daily return
+- Log return
+- 7-day moving average
+- 14-day moving average
+- 30-day moving average
+- 7-day volatility
+- 30-day volatility
+- RSI 14
+- MACD
+- Signal line
+- Bollinger upper band
+- Bollinger lower band
+- 7-day momentum
+- 14-day momentum
+
+### Run Feature Engineering
+
+```bash
+python -m src.features.build_features
