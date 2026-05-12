@@ -122,3 +122,27 @@ The target variable predicts whether the next trading day's adjusted closing pri
 
 ```bash
 python -m src.models.train_baseline_classifier
+
+## Stage 4: MLflow MLOps Tracking
+
+Stage 4 adds MLflow experiment tracking to the baseline stock direction models.
+
+### What is tracked
+
+- Model name
+- Dataset size
+- Train/test split size
+- Feature list
+- Model parameters
+- Accuracy
+- Precision
+- Recall
+- F1 score
+- Classification report
+- Confusion matrix image
+- Saved MLflow model artifact
+
+### Run MLflow Training
+
+```bash
+python -m src.mlops.train_with_mlflow
