@@ -87,3 +87,38 @@ Stage 2 converts raw stock price data into technical indicators for machine lear
 
 ```bash
 python -m src.features.build_features
+
+## Stage 3: Baseline Machine Learning Model
+
+Stage 3 builds the first supervised machine learning model for stock direction prediction.
+
+The target variable predicts whether the next trading day's adjusted closing price will be higher than the current day's adjusted closing price.
+
+### Models Trained
+
+- Logistic Regression
+- Random Forest Classifier
+
+### Features Used
+
+- Daily return
+- Log return
+- Moving averages
+- Volatility
+- RSI
+- MACD
+- Signal line
+- Bollinger Bands
+
+### Evaluation Metrics
+
+- Accuracy
+- Precision
+- Recall
+- F1 score
+- Confusion matrix
+
+### Run Training
+
+```bash
+python -m src.models.train_baseline_classifier
