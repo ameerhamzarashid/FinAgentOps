@@ -146,3 +146,14 @@ Stage 4 adds MLflow experiment tracking to the baseline stock direction models.
 
 ```bash
 python -m src.mlops.train_with_mlflow
+
+## Stage 5: Next-Day Return Forecasting Model
+
+Stage 5 builds regression models to forecast next-day stock returns.
+
+### Target Variable
+
+The target variable is `next_day_return`, calculated as:
+
+```text
+next_day_return = (next_day_adjusted_close - current_adjusted_close) / current_adjusted_close
