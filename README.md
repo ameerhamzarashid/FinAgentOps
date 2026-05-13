@@ -185,3 +185,23 @@ AAPL, MSFT, NVDA, GOOGL, AMZN, META, TSLA, JPM, V, NFLX
 
 ```bash
 python -m src.models.portfolio_risk_engine
+
+## Stage 7: Prefect Automation
+
+Stage 7 automates the FinAgentOps workflow using Prefect.
+
+### Automated Pipeline Steps
+
+1. Stock data ingestion
+2. Technical feature engineering
+3. Direction classifier training
+4. Next-day return model training
+5. Latest stock predictions
+6. Portfolio risk calculation
+7. Portfolio chart generation
+8. Pipeline status logging
+
+### Run Full Daily Pipeline
+
+```bash
+python -m src.workflows.daily_pipeline

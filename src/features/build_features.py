@@ -92,12 +92,14 @@ def build_features_for_ticker(group):
 
 
 def build_all_features(price_data):
-    feature_data = (
-        price_data
-        .groupby("ticker", group_keys=False)
-        .apply(build_features_for_ticker)
-        .reset_index(drop=True)
-    )
+    feature_data = []
+
+    for ticker, group in price_data.groupby("ticker"):
+        group_features = build_features_for_ticker(group)
+        group_features["ticker"] = ticker
+        feature_data.append(group_features)
+
+    feature_data = pd.concat(feature_data, ignore_index=True)
 
     selected_columns = [
         "ticker",
