@@ -13,9 +13,25 @@ from src.models.predict_latest import predict_latest_direction
 from src.models.predict_next_day_return import predict_next_day_return
 from src.models.portfolio_risk_engine import main as run_portfolio_risk_engine
 from src.models.plot_portfolio_risk import main as run_portfolio_charts
+from src.agents.financial_report_agent import run_agent_report
 
 
 PIPELINE_NAME = "daily_finagentops_pipeline"
+
+DEFAULT_TICKERS = [
+    "AAPL",
+    "MSFT",
+    "NVDA",
+    "GOOGL",
+    "AMZN",
+    "META",
+    "TSLA",
+    "JPM",
+    "V",
+    "NFLX",
+]
+
+AGENT_REPORT_TICKERS = ["AAPL", "MSFT", "NVDA"]
 
 
 def log_pipeline_status(status, message):
@@ -76,9 +92,7 @@ def train_return_model():
 
 @task(name="Generate latest stock predictions")
 def generate_latest_predictions():
-    tickers = ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "JPM", "V", "NFLX"]
-
-    for ticker in tickers:
+    for ticker in DEFAULT_TICKERS:
         print(f"\nGenerating direction prediction for {ticker}")
         predict_latest_direction(ticker)
 
@@ -94,6 +108,13 @@ def calculate_portfolio_risk():
 @task(name="Generate portfolio risk charts")
 def generate_portfolio_charts():
     run_portfolio_charts()
+
+
+@task(name="Generate agentic AI reports")
+def generate_agentic_reports():
+    for ticker in AGENT_REPORT_TICKERS:
+        print(f"\nGenerating agentic report for {ticker}")
+        run_agent_report(ticker)
 
 
 @task(name="Log pipeline success")
@@ -114,6 +135,7 @@ def log_failure(error_message):
 def daily_finagentops_pipeline(
     retrain_models: bool = True,
     run_predictions: bool = True,
+    run_agent_reports: bool = True,
 ):
     try:
         log_start()
@@ -131,12 +153,15 @@ def daily_finagentops_pipeline(
         calculate_portfolio_risk()
         generate_portfolio_charts()
 
+        if run_agent_reports:
+            generate_agentic_reports()
+
         log_success()
 
-    except Exception as error:
+    except Exception:
         error_details = traceback.format_exc()
         log_failure(error_details)
-        raise error
+        raise
 
 
 if __name__ == "__main__":
