@@ -157,3 +157,31 @@ The target variable is `next_day_return`, calculated as:
 
 ```text
 next_day_return = (next_day_adjusted_close - current_adjusted_close) / current_adjusted_close
+
+## Stage 6: Portfolio Risk Engine
+
+Stage 6 calculates portfolio-level risk and return metrics using adjusted closing prices.
+
+### Portfolio Metrics
+
+- Daily portfolio return
+- Annualized return
+- Annualized volatility
+- Sharpe ratio
+- Maximum drawdown
+- Historical Value at Risk at 95%
+- Historical Value at Risk at 99%
+- Correlation matrix
+- Risk score
+- Risk level
+
+### Default Portfolio
+
+The default portfolio uses 10 stocks:
+
+AAPL, MSFT, NVDA, GOOGL, AMZN, META, TSLA, JPM, V, NFLX
+
+### Run Portfolio Risk Engine
+
+```bash
+python -m src.models.portfolio_risk_engine

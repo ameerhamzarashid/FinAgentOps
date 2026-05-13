@@ -58,3 +58,20 @@ CREATE TABLE IF NOT EXISTS pipeline_logs (
     message TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS portfolio_risk (
+    id SERIAL PRIMARY KEY,
+    portfolio_name VARCHAR(100),
+    calculation_date DATE,
+    tickers TEXT,
+    weights TEXT,
+    annualized_return NUMERIC,
+    annualized_volatility NUMERIC,
+    sharpe_ratio NUMERIC,
+    max_drawdown NUMERIC,
+    value_at_risk_95 NUMERIC,
+    value_at_risk_99 NUMERIC,
+    risk_score NUMERIC,
+    risk_level VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
