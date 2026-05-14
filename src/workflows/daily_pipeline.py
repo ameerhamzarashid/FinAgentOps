@@ -14,7 +14,8 @@ from src.models.predict_next_day_return import predict_next_day_return
 from src.models.portfolio_risk_engine import main as run_portfolio_risk_engine
 from src.models.plot_portfolio_risk import main as run_portfolio_charts
 from src.agents.financial_report_agent import run_agent_report
-
+from src.ingestion.fetch_sec_fundamentals import main as run_sec_fundamentals
+from src.features.fundamental_summary import main as run_fundamental_summary
 
 PIPELINE_NAME = "daily_finagentops_pipeline"
 
@@ -130,7 +131,15 @@ def log_failure(error_message):
     print(message)
     log_pipeline_status("FAILED", message)
 
+@task(name="Run SEC fundamentals ingestion")
+def ingest_sec_fundamentals():
+    run_sec_fundamentals()
 
+
+@task(name="Build fundamentals summary")
+def build_fundamentals_summary():
+    run_fundamental_summary()
+    
 @flow(name="FinAgentOps Daily Pipeline", log_prints=True)
 def daily_finagentops_pipeline(
     retrain_models: bool = True,
@@ -142,6 +151,8 @@ def daily_finagentops_pipeline(
 
         ingest_market_data()
         build_technical_features()
+        ingest_sec_fundamentals()
+        build_fundamentals_summary()
 
         if retrain_models:
             train_direction_model()

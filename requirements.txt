@@ -23,3 +23,5 @@ openai
 jupyter
 ipykernel
 pytest
+
+requests

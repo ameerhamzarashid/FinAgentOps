@@ -20,6 +20,7 @@ class AgentState(TypedDict):
     data_summary: Optional[str]
     model_summary: Optional[str]
     portfolio_summary: Optional[str]
+    fundamental_summary: Optional[str]
     analyst_summary: Optional[str]
     final_report: Optional[str]
 
@@ -38,7 +39,7 @@ This report was generated using the local rule-based fallback report generator.
 
 ## Educational Analytics Summary
 
-The FinAgentOps system successfully collected market data, technical indicators, machine learning model outputs, and portfolio risk metrics.
+The FinAgentOps system successfully collected market data, technical indicators, machine learning model outputs, portfolio risk metrics, and SEC company fundamentals.
 
 ## Source Context
 
@@ -46,11 +47,11 @@ The FinAgentOps system successfully collected market data, technical indicators,
 
 ## Interpretation
 
-The report combines recent technical indicators, model performance summaries, and portfolio risk metrics. This fallback version is designed to keep the project running locally without requiring an external LLM API key.
+The report combines recent market behaviour, technical indicators, model performance summaries, portfolio risk metrics, and SEC fundamentals. This fallback version is designed to keep the project running locally without requiring an external LLM API key.
 
 ## Limitations
 
-This is not a full LLM-generated report. It is a local fallback report for development and portfolio demonstration.
+This is not a full LLM-generated report. It is a local fallback report for development and portfolio demonstration. Financial market data and SEC fundamentals may be delayed, incomplete, or affected by reporting differences.
 
 ## Disclaimer
 
@@ -215,6 +216,92 @@ Risk level: {latest["risk_level"]}
     return state
 
 
+def fundamentals_agent(state: AgentState) -> AgentState:
+    ticker = state["ticker"]
+    engine = get_engine()
+
+    query = """
+    SELECT
+        ticker,
+        company_name,
+        fiscal_year,
+        fiscal_period,
+        form_type,
+        filed_date,
+        revenue,
+        net_income,
+        assets,
+        liabilities,
+        stockholders_equity,
+        operating_cash_flow,
+        eps_basic,
+        eps_diluted
+    FROM company_fundamentals
+    WHERE ticker = %(ticker)s
+    ORDER BY fiscal_year DESC, filed_date DESC
+    LIMIT 1;
+    """
+
+    data = pd.read_sql(query, engine, params={"ticker": ticker})
+
+    if data.empty:
+        state["fundamental_summary"] = f"No SEC fundamentals found for {ticker}."
+        return state
+
+    latest = data.iloc[0]
+
+    revenue = pd.to_numeric(latest["revenue"], errors="coerce")
+    net_income = pd.to_numeric(latest["net_income"], errors="coerce")
+    assets = pd.to_numeric(latest["assets"], errors="coerce")
+    liabilities = pd.to_numeric(latest["liabilities"], errors="coerce")
+    stockholders_equity = pd.to_numeric(
+        latest["stockholders_equity"],
+        errors="coerce",
+    )
+
+    net_margin = None
+    debt_to_assets = None
+    return_on_assets = None
+    equity_ratio = None
+
+    if pd.notna(revenue) and revenue != 0 and pd.notna(net_income):
+        net_margin = net_income / revenue
+
+    if pd.notna(assets) and assets != 0:
+        if pd.notna(liabilities):
+            debt_to_assets = liabilities / assets
+
+        if pd.notna(net_income):
+            return_on_assets = net_income / assets
+
+        if pd.notna(stockholders_equity):
+            equity_ratio = stockholders_equity / assets
+
+    fundamental_summary = f"""
+Company: {latest["company_name"]}
+Ticker: {ticker}
+Fiscal year: {latest["fiscal_year"]}
+Fiscal period: {latest["fiscal_period"]}
+Form type: {latest["form_type"]}
+Filed date: {latest["filed_date"]}
+Revenue: {latest["revenue"]}
+Net income: {latest["net_income"]}
+Assets: {latest["assets"]}
+Liabilities: {latest["liabilities"]}
+Stockholders equity: {latest["stockholders_equity"]}
+Operating cash flow: {latest["operating_cash_flow"]}
+EPS basic: {latest["eps_basic"]}
+EPS diluted: {latest["eps_diluted"]}
+Net margin: {net_margin}
+Debt to assets: {debt_to_assets}
+Return on assets: {return_on_assets}
+Equity ratio: {equity_ratio}
+"""
+
+    state["fundamental_summary"] = fundamental_summary
+    return state
+
+
 def analyst_agent(state: AgentState) -> AgentState:
     prompt = f"""
 You are a financial analytics assistant for an educational portfolio project.
@@ -236,12 +323,16 @@ Model summary:
 Portfolio risk:
 {state["portfolio_summary"]}
 
+Company fundamentals:
+{state["fundamental_summary"]}
+
 Write:
 1. Market snapshot
 2. Technical interpretation
-3. Model interpretation
-4. Risk interpretation
-5. Key caution
+3. Company fundamentals interpretation
+4. Model interpretation
+5. Risk interpretation
+6. Key caution
 """
 
     analyst_summary = call_llm(prompt)
@@ -262,6 +353,7 @@ Use this structure:
 ## Ticker Reviewed
 ## Market Snapshot
 ## Technical Signal Summary
+## Company Fundamentals Summary
 ## Machine Learning Model Summary
 ## Portfolio Risk Context
 ## Educational Interpretation
@@ -296,6 +388,7 @@ def build_agent_graph():
     graph.add_node("data_agent", data_agent)
     graph.add_node("ml_agent", ml_agent)
     graph.add_node("portfolio_agent", portfolio_agent)
+    graph.add_node("fundamentals_agent", fundamentals_agent)
     graph.add_node("analyst_agent", analyst_agent)
     graph.add_node("report_agent", report_agent)
 
@@ -303,7 +396,8 @@ def build_agent_graph():
 
     graph.add_edge("data_agent", "ml_agent")
     graph.add_edge("ml_agent", "portfolio_agent")
-    graph.add_edge("portfolio_agent", "analyst_agent")
+    graph.add_edge("portfolio_agent", "fundamentals_agent")
+    graph.add_edge("fundamentals_agent", "analyst_agent")
     graph.add_edge("analyst_agent", "report_agent")
     graph.add_edge("report_agent", END)
 
@@ -318,6 +412,7 @@ def run_agent_report(ticker: str = "AAPL"):
         "data_summary": None,
         "model_summary": None,
         "portfolio_summary": None,
+        "fundamental_summary": None,
         "analyst_summary": None,
         "final_report": None,
     }

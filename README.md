@@ -205,3 +205,33 @@ Stage 7 automates the FinAgentOps workflow using Prefect.
 
 ```bash
 python -m src.workflows.daily_pipeline
+
+## Stage 9: SEC Fundamentals Integration
+
+Stage 9 adds company fundamentals from the official SEC EDGAR APIs.
+
+### Data Source
+
+The SEC EDGAR APIs provide JSON-formatted access to company submissions and extracted XBRL financial data through `data.sec.gov`.
+
+### Fundamentals Collected
+
+- CIK
+- Company name
+- Filing form
+- Fiscal year
+- Fiscal period
+- Filing date
+- Revenue
+- Net income
+- Assets
+- Liabilities
+- Stockholders' equity
+- Operating cash flow
+- Basic EPS
+- Diluted EPS
+
+### Run SEC Fundamentals Ingestion
+
+```bash
+python -m src.ingestion.fetch_sec_fundamentals

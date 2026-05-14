@@ -75,3 +75,30 @@ CREATE TABLE IF NOT EXISTS portfolio_risk (
     risk_level VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS company_fundamentals (
+    id SERIAL PRIMARY KEY,
+    ticker VARCHAR(20),
+    cik VARCHAR(20),
+    company_name VARCHAR(255),
+    fiscal_year INTEGER,
+    fiscal_period VARCHAR(20),
+    form_type VARCHAR(20),
+    filed_date DATE,
+    revenue NUMERIC,
+    net_income NUMERIC,
+    assets NUMERIC,
+    liabilities NUMERIC,
+    stockholders_equity NUMERIC,
+    operating_cash_flow NUMERIC,
+    eps_basic NUMERIC,
+    eps_diluted NUMERIC,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(ticker, fiscal_year, fiscal_period, form_type)
+);
+
+CREATE TABLE IF NOT EXISTS sec_company_metadata (
+    ticker VARCHAR(20) PRIMARY KEY,
+    cik VARCHAR(20),
+    company_name VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
