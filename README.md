@@ -235,3 +235,27 @@ The SEC EDGAR APIs provide JSON-formatted access to company submissions and extr
 
 ```bash
 python -m src.ingestion.fetch_sec_fundamentals
+
+## Stage 10: FastAPI Backend
+
+Stage 10 exposes FinAgentOps through a FastAPI backend.
+
+### API Endpoints
+
+- `GET /health`
+- `GET /stocks`
+- `GET /market/latest/{ticker}`
+- `GET /market/history/{ticker}`
+- `GET /predict/direction/{ticker}`
+- `GET /predict/return/{ticker}`
+- `GET /portfolio/risk`
+- `GET /fundamentals/{ticker}`
+- `GET /report/{ticker}`
+- `GET /models/status`
+- `GET /pipeline/status`
+
+### Run API
+
+```bash
+uvicorn src.api.main:app --reload
+
